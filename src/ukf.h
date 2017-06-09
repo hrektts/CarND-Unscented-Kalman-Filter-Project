@@ -102,6 +102,85 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+private:
+  ///* augmented sigma points matrix
+  MatrixXd Xsig_aug_;
+
+  ///* measurement dimension
+  int n_z_;
+
+  ///* sigma points matrix in measurement space
+  MatrixXd Zsig_;
+
+  ///* predicted mean measurement
+  VectorXd z_pred_;
+
+  ///* measurement covariance matrix
+  MatrixXd S_;
+
+  /**
+   * Compute augmented sigma points
+   */
+  void ComputeAugmentedSigmaPoints();
+
+  /**
+   * Predict augmented sigma points
+   * @param delta_t Time difference between current and previous predictions
+   */
+  void PredictAugmentedSigmaPoints(double delta_t);
+
+  /**
+   * Predict mean and covariance based on process model
+   */
+  void PredictMeanAndCovariance();
+
+  /**
+   * Transform predicted state into the measurement space
+   * @param Zsig Sigma points in measurement space
+   * @param z_pred Predicted mean measurement
+   * @param S Measurement covariance matrix
+   */
+  void PredictLaserMeasurement(MatrixXd& Zsig, VectorXd& z_pred, MatrixXd& S);
+
+  /**
+   * Update the belief about the object's position using laser data
+   * @param z Measured radar data
+   * @param Zsig Sigma points in measurement space
+   * @param z_pred Predicted mean measurement
+   * @param S Measurement covariance matrix
+   */
+  void UpdateLaserState(const VectorXd& z, const MatrixXd& Zsig,
+                        const VectorXd& z_pred, const MatrixXd& S);
+
+  /**
+   * Transform predicted state into the measurement space of the lidar
+   * @param R Measurement covariance noise matrix
+   * @param angles The indexes of which the unit of the measurement is an angle
+   */
+  void PredictLidarMeasurement(const MatrixXd& R, std::vector<unsigned> angles);
+
+  /**
+   * Transform predicted state into the measurement space of the radar
+   * @param R Measurement covariance noise matrix
+   * @param angles The indexes of which the unit of the measurement is an angle
+   */
+  void PredictRadarMeasurement(const MatrixXd& R, std::vector<unsigned> angles);
+
+  /**
+   * Transform predicted state into the measurement space
+   * @param R Measurement covariance noise matrix
+   * @param angles The indexes of which the unit of the measurement is an angle
+   */
+  void PredictMeasurementCommon(const MatrixXd& R, std::vector<unsigned> angles);
+
+  /**
+   * Update the belief about the object's position using radar data
+   * @param z Measured radar data
+   * @param x_angles The indexes of which the unit of the state is an angle
+   * @param z_angles The indexes of which the unit of the measurement is an angle
+   */
+  void UpdateState(const VectorXd& z, std::vector<unsigned> x_angles, std::vector<unsigned> z_angles);
 };
 
 #endif /* UKF_H */
